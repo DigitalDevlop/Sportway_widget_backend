@@ -1,26 +1,31 @@
 const express = require('express');
 const { MongoClient } = require('mongodb');
 const nodemailer = require('nodemailer');
-require('dotenv').config();
 const cors = require('cors');
 
 const app = express();
 
-app.use(cors());
+// Configure CORS to allow requests only from 'https://sportway-widget.vercel.app'
+const corsOptions = {
+  origin: 'https://sportway-widget.vercel.app', // Allow this specific domain
+  methods: 'GET,POST', // Allow these HTTP methods
+  allowedHeaders: 'Content-Type,Authorization', // Allow these headers
+};
+app.use(cors(corsOptions));
 
 // Middleware to parse JSON request body
 app.use(express.json());
 
 // MongoDB connection URI and database details
-const uri = process.env.MONGO_URI || "mongodb+srv://dilanjan:dilanjan@sp.e5bvk.mongodb.net/?retryWrites=true&w=majority&appName=sp";
+const uri = "mongodb+srv://dilanjan:dilanjan@sp.e5bvk.mongodb.net/?retryWrites=true&w=majority&appName=sp";
 const client = new MongoClient(uri);
 
 // Nodemailer transporter setup
 const transporter = nodemailer.createTransport({
-  service: 'gmail', // Replace with your email service provider
+  service: 'gmail',
   auth: {
-    user: process.env.EMAIL_USER || 'lucky1blog@gmail.com', // Replace with your email
-    pass: process.env.EMAIL_PASS || 'pboy axqm cakk pplg', // Replace with your email password or app-specific password
+    user: 'lucky1blog@gmail.com', // Replace with your email
+    pass: 'pboy axqm cakk pplg',  // Replace with your app password
   },
 });
 
@@ -29,8 +34,8 @@ let customerCollection;
 async function connectDB() {
   try {
     await client.connect();
-    const database = client.db("my_database"); // Replace with your database name
-    customerCollection = database.collection("customers"); // Replace with your collection name
+    const database = client.db("my_database");
+    customerCollection = database.collection("customers");
     console.log("Connected to MongoDB!");
   } catch (err) {
     console.error("Failed to connect to MongoDB", err);
@@ -58,8 +63,8 @@ app.post('/api/customer', async (req, res) => {
 
     // Prepare email content
     const mailOptions = {
-      from: process.env.EMAIL_USER || 'lucky1blog@gmail.com', // Sender address
-      to: 'kasun@sportway.lk', // Replace with the recipient email
+      from: 'lucky1blog@gmail.com', // Sender address
+      to: 'kasun@sportway.lk',     // Recipient address
       subject: 'New Customer Submission',
       text: `A new customer has submitted their details:\n\nName: ${Name}\nMobile: ${Mobile}`,
     };
@@ -81,9 +86,7 @@ app.post('/api/customer', async (req, res) => {
 });
 
 // Start the server
-const port = process.env.PORT || 8000;
+const port = 8000;
 app.listen(port, () => {
   console.log(`App is running on port ${port}`);
 });
-
-
